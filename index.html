@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QR Studio — Smart QR Designer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">▦</div><div><b>QR Studio</b><small>SMART QR DESIGNER</small></div></div>
+    <div class="side-label">WORKSPACE</div>
+    <a class="nav active" href="#designer"><span>✳</span> QR Designer</a>
+    <a class="nav" href="#batch"><span>▤</span> Batch Studio</a>
+    <a class="nav" href="#history"><span>◷</span> Recent codes</a>
+    <div class="sidebar-bottom"><div class="status-dot"></div><div><b>Local workspace</b><small>Your data stays on this device</small></div></div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar"><div><div class="eyebrow">CREATIVE TOOLS / QR DESIGNER</div><h1>Make it scannable.</h1><p>Design custom QR codes for your links, brand, and everyday workflows.</p></div><div class="top-pill"><span class="pulse"></span> READY TO CREATE</div></header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}<div class="messages">{% for category, message in messages %}<div class="alert {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+    {% endwith %}
+
+    <section class="workspace" id="designer">
+      <form class="panel editor" action="{{ url_for('generate') }}" method="post" enctype="multipart/form-data">
+        <div class="panel-heading"><div><span class="step">01</span><h2>Content & design</h2></div><span class="tiny-tag">CUSTOMIZE</span></div>
+        <label for="data">Your content <span class="required">*</span></label>
+        <textarea id="data" name="data" placeholder="Paste a URL, type a message, or add any text…" required maxlength="2000"></textarea>
+        <div class="helper-row"><span>URLs, text, contact info and more</span><span id="char-count">0 / 2000</span></div>
+        <div class="field-grid">
+          <div><label for="filename">File name</label><input id="filename" name="filename" value="qr-studio-code" maxlength="70"></div>
+          <div><label for="format">Export format</label><select id="format" name="format"><option>PNG</option><option>JPEG</option></select></div>
+        </div>
+        <div class="section-rule"><span>APPEARANCE</span></div>
+        <div class="color-grid">
+          <div class="color-field"><label for="foreground">Foreground</label><div class="color-control"><input type="color" id="foreground" name="foreground" value="#111827"><code id="fg-label">#111827</code></div></div>
+          <div class="color-field"><label for="background">Background</label><div class="color-control"><input type="color" id="background" name="background" value="#ffffff"><code id="bg-label">#FFFFFF</code></div></div>
+        </div>
+        <div class="presets"><button type="button" class="swatch" data-fg="#111827" data-bg="#FFFFFF"><i style="background:#111827"></i> Classic</button><button type="button" class="swatch" data-fg="#4338CA" data-bg="#F5F3FF"><i style="background:#4338CA"></i> Violet</button><button type="button" class="swatch" data-fg="#047857" data-bg="#ECFDF5"><i style="background:#047857"></i> Forest</button><button type="button" class="swatch" data-fg="#9F1239" data-bg="#FFF1F2"><i style="background:#9F1239"></i> Rose</button></div>
+        <div class="field-grid">
+          <div><label for="error_correction">Error correction</label><select id="error_correction" name="error_correction"><option value="L">L — 7%</option><option value="M">M — 15%</option><option value="Q">Q — 25%</option><option value="H" selected>H — 30% (logo-friendly)</option></select></div>
+          <div><label for="box_size">Resolution</label><select id="box_size" name="box_size"><option value="6">Compact</option><option value="10" selected>Standard</option><option value="14">High</option><option value="18">Ultra</option></select></div>
+        </div>
+        <div class="field-grid">
+          <div><label for="border">Quiet-zone border</label><select id="border" name="border"><option value="2">2 modules</option><option value="4" selected>4 modules (recommended)</option><option value="6">6 modules</option><option value="8">8 modules</option></select></div>
+          <div><label for="logo">Center logo <span class="optional">OPTIONAL</span></label><input class="file-input" type="file" id="logo" name="logo" accept=".png,.jpg,.jpeg,.webp"></div>
+        </div>
+        <button class="primary-btn" type="submit"><span>✦</span> Generate & download <span class="arrow">↗</span></button>
+        <p class="fine-print">Tip: use strong contrast and scan-test codes with a logo before sharing.</p>
+      </form>
+
+      <div class="right-column">
+        <section class="panel preview-panel">
+          <div class="panel-heading"><div><span class="step">02</span><h2>Live preview</h2></div><span class="live-tag"><i></i> LIVE</span></div>
+          <div class="preview-stage">
+            <div class="preview-card" id="preview-card"><div id="qr-preview" class="qr-placeholder"><div class="placeholder-mark">▦</div><b>Your QR will appear here</b><span>Enter content to preview a styled sample</span></div></div>
+          </div>
+          <div class="preview-meta"><div><small>CONTENT TYPE</small><b id="content-type">Waiting for input</b></div><div><small>COLOR PALETTE</small><b id="palette-label">Classic mono</b></div></div>
+          <div class="preview-note"><span>ⓘ</span><p>This preview is illustrative. The downloadable QR is generated by the Python backend.</p></div>
+        </section>
+        <section class="mini-stats"><div class="stat-icon">▦</div><div><small>BUILT FOR YOUR WORKFLOW</small><b>Customize · Generate · Export</b></div><span class="stat-spark">✳</span></section>
+      </div>
+    </section>
+
+    <section class="panel batch-panel" id="batch">
+      <div class="panel-heading"><div><span class="step">03</span><h2>Batch Studio</h2></div><span class="tiny-tag">BULK EXPORT</span></div>
+      <p class="section-description">Generate up to 100 QR codes in one go. Upload a plain-text file with one item per line, or a CSV with content in the first column. Your codes arrive together in a ZIP file.</p>
+      <form action="{{ url_for('batch') }}" method="post" enctype="multipart/form-data" class="batch-form">
+        <label class="upload-box" for="batch_file"><div class="upload-icon">↑</div><b>Choose a .TXT or .CSV file</b><span>One QR item per line · Max 100 items</span><input type="file" id="batch_file" name="batch_file" accept=".txt,.csv" required></label>
+        <div class="batch-options"><div><label for="batch_foreground">Foreground</label><input type="color" id="batch_foreground" name="batch_foreground" value="#111827"></div><div><label for="batch_background">Background</label><input type="color" id="batch_background" name="batch_background" value="#ffffff"></div><div><label for="batch_error">Correction</label><select id="batch_error" name="batch_error"><option value="M">M — Balanced</option><option value="Q">Q — High</option><option value="H" selected>H — Maximum</option></select></div><button type="submit" class="secondary-btn">Generate ZIP <span>↗</span></button></div>
+      </form>
+    </section>
+
+    <section class="panel history-panel" id="history">
+      <div class="panel-heading"><div><span class="step">04</span><h2>Recent codes</h2></div><span class="tiny-tag">{{ history|length }} SHOWN</span></div>
+      {% if history %}
+      <div class="history-list">
+        {% for item in history %}
+        <div class="history-item"><div class="history-symbol">▦</div><div class="history-text"><b>{{ item.filename }}</b><span>{{ item.data }}</span><small>{{ item.created_at }} · {{ item.format }} · EC {{ item.error_correction }}</small></div><div class="history-colors"><i style="background:{{ item.foreground }}"></i><i style="background:{{ item.background }}"></i></div></div>
+        {% endfor %}
+      </div>
+      <form action="{{ url_for('clear_history') }}" method="post" onsubmit="return confirm('Clear all local history?')"><button class="text-btn" type="submit">Clear history</button></form>
+      {% else %}<div class="empty-history"><span>◷</span><b>Your recent codes will show up here</b><p>Generate a code to start your local history.</p></div>{% endif %}
+    </section>
+    <footer>QR STUDIO <span>·</span> A Python + Pillow project <span>·</span> Made to be scanned.</footer>
+  </main>
+</div>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
